@@ -49,11 +49,11 @@ public class CMDList implements CommandExecutor {
 			
 			String worldName = node.getNode("world").getString();
 			String next = node.getNode("next").getString();
-			int delay = node.getNode("delay").getInt();
+			int delay = node.getNode("interval").getInt();
 			
 			list.add(Text.of(TextColors.GREEN, "Name: ", TextColors.WHITE, name));
 			list.add(Text.of(TextColors.GREEN, "  - World: ", TextColors.WHITE, worldName));
-			list.add(Text.of(TextColors.GREEN, "  - Delay: ", TextColors.WHITE, Utils.getReadableTime(delay)));
+			list.add(Text.of(TextColors.GREEN, "  - Interval: ", TextColors.WHITE, Utils.getReadableTime(delay)));
 			list.add(Text.of(TextColors.GREEN, "  - Next Run: ", TextColors.WHITE, next));
 		}
 

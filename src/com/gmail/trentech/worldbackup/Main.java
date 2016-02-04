@@ -58,23 +58,26 @@ public class Main {
 			
 			String worldName = node.getNode("world").getString();
 			String next = node.getNode("next").getString();
+
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			
 			Date date = null;
-
 			try {
-				date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(next);		
+				date = format.parse(next);		
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
-			int seconds = (int) ((date.getTime() - new Date().getTime()) / 1000);
 			
-			if(seconds <= 0){
-				Zip.save(worldName);
-				
-				seconds = node.getNode("delay").getInt();
+			int interval = (int) ((date.getTime() - new Date().getTime()) / 1000);
+			
+			while(interval <= 0){
+				new Zip(worldName).save();
+
+				interval = node.getNode("interval").getInt();
 				
 				Calendar calendar = Calendar.getInstance();
-				calendar.add(Calendar.SECOND, seconds);
+				calendar.setTime(date);
+				calendar.add(Calendar.SECOND, interval);
 				date = calendar.getTime();
 
 				next = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
@@ -82,9 +85,11 @@ public class Main {
 				config.getNode("schedulers", name, "next").setValue(next);
 				
 				configManager.save();
+
+				interval = (int) ((date.getTime() - new Date().getTime()) / 1000);
 			}
 
-			createTask(name, worldName, seconds);
+			createTask(name, worldName, interval);
 		}
     }
 
@@ -110,27 +115,29 @@ public class Main {
 		return plugin;
 	}
 	
-	public static void createTask(String name, String worldName, int delay){
-        Main.getGame().getScheduler().createTaskBuilder().delay(delay, TimeUnit.SECONDS).name(name).execute(new Runnable() {
+	public static void createTask(String name, String worldName, int interval){
+		ConfigManager configManager = new ConfigManager();
+		ConfigurationNode config = configManager.getConfig();
+		
+		int newInterval = config.getNode("schedulers", name, "interval").getInt();
+		
+        Main.getGame().getScheduler().createTaskBuilder().delay(interval, TimeUnit.SECONDS).name(name).execute(new Runnable() {
 
 			@Override
-            public void run() {
-				Zip.save(worldName);
-				
-				ConfigManager configManager = new ConfigManager();
-				ConfigurationNode config = configManager.getConfig();
+            public void run() {			
+				new Zip(worldName).save();
 
 				Calendar calendar = Calendar.getInstance();
-				calendar.add(Calendar.SECOND, delay);
+				calendar.add(Calendar.SECOND, interval);
 				Date date = calendar.getTime();
 
 				String next = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
 
 				config.getNode("schedulers", name, "next").setValue(next);
-				
+
 				configManager.save();
 				
-				createTask(name, worldName, delay);
+				createTask(name, worldName, newInterval);
 			}
         }).submit(getPlugin());
 	}

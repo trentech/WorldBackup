@@ -10,7 +10,7 @@ public class CommandManager {
 		    .permission("worldbackup.cmd.backup.create")
 		    .arguments(GenericArguments.optional(GenericArguments.string(Text.of("name"))),
 		    		GenericArguments.optional(GenericArguments.world(Text.of("world"))),
-		    		GenericArguments.optional(GenericArguments.string(Text.of("time"))))
+		    		GenericArguments.optional(GenericArguments.string(Text.of("interval"))))
 		    .executor(new CMDCreate())
 		    .build();
 	

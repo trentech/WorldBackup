@@ -25,7 +25,7 @@ public class CMDCreate implements CommandExecutor {
 
 	public CMDCreate(){
 		Help help = new Help("create", "create", " Create a scheduled world backup");
-		help.setSyntax(" /backup create <name> <world> <time>\n /b c <name> <world> <time>");
+		help.setSyntax(" /backup create <name> <world> <interval>\n /b c <name> <world> <interval>");
 		help.setExample(" /backup create MyTask world 30m\n /backup create MyTask world 1d,6h,5m,10s");
 		help.save();
 	}
@@ -33,7 +33,7 @@ public class CMDCreate implements CommandExecutor {
 	@Override
 	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
 		if(!args.hasAny("name")) {
-			src.sendMessage(Text.of(TextColors.YELLOW, "/backup <name> <world> <time>"));
+			src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <name> <world> <interval>"));
 			return CommandResult.empty();
 		}
 		String name = args.<String>getOne("name").get();
@@ -47,29 +47,29 @@ public class CMDCreate implements CommandExecutor {
 		}
 		
 		if(!args.hasAny("world")) {
-			src.sendMessage(Text.of(TextColors.YELLOW, "/backup <world>"));
+			src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <name> <world> <interval>"));
 			return CommandResult.empty();
 		}
 		String worldName = args.<WorldProperties>getOne("world").get().getWorldName();
 		
-		if(!args.hasAny("time")) {
-			src.sendMessage(Text.of(TextColors.YELLOW, "/backup <name> <world> <time>"));
+		if(!args.hasAny("interval")) {
+			src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <name> <world> <interval>"));
 			return CommandResult.empty();
 		}
-		String time = args.<String>getOne("time").get();
+		String time = args.<String>getOne("interval").get();
 		
 		Optional<Integer> optionalTime = Utils.getTimeInSeconds(time);
 		
 		if(!Utils.getTimeInSeconds(time).isPresent()){
 			src.sendMessage(Text.of(TextColors.DARK_RED, "Invalid time"));
-			src.sendMessage(Text.of(TextColors.YELLOW, "/backup <name> <world> <time>"));
+			src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <name> <world> <interval>"));
 			return CommandResult.empty();
 		}
 		
 		int seconds = optionalTime.get();
 		
 		config.getNode("schedulers", name, "world").setValue(worldName);
-		config.getNode("schedulers", name, "delay").setValue(seconds);
+		config.getNode("schedulers", name, "interval").setValue(seconds);
 
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.SECOND, seconds);

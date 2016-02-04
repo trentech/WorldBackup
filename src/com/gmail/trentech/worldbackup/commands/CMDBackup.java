@@ -30,7 +30,7 @@ public class CMDBackup implements CommandExecutor {
 			
 			List<Text> list = new ArrayList<>();
 			
-			list.add(Text.of(TextColors.YELLOW, "/backup <world>\n"));
+			list.add(Text.of(TextColors.YELLOW, " /backup <world>"));
 			
 			if(src.hasPermission("worldbackup.cmd.backup.create")) {
 				list.add(Text.builder().color(TextColors.GREEN).onHover(TextActions.showText(Text.of("Click command for more information ")))
@@ -53,7 +53,7 @@ public class CMDBackup implements CommandExecutor {
 		}
 		String worldName = args.<WorldProperties>getOne("world").get().getWorldName();
 
-		Zip.save(worldName);
+		new Zip(worldName).save();
 		
 		return CommandResult.success();
 	}

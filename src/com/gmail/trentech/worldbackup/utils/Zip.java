@@ -13,16 +13,28 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
+
 import com.gmail.trentech.worldbackup.Main;
 
 public class Zip {
 
-	public static void save(String worldName){
-		Main.getLog().info("Backing up " + worldName);
+	String worldName;
+	File backupDir;
+	File worldDir;
+	
+	public Zip(String worldName){
+		this.worldName = worldName;
+		this.backupDir = new File("config" + File.separator + Resource.ID.toLowerCase() + File.separator + "backups" + File.separator + worldName);
 		
+    	if (!backupDir.isDirectory()) {
+    		backupDir.mkdirs();
+    	}
+    	
 		File savesDir = Main.getGame().getSavesDirectory().toFile();
-		File worldDir;
-		
+
 		String defaultWorld = Main.getGame().getServer().getDefaultWorldName();
 		
 		if(worldName.equalsIgnoreCase(defaultWorld)){
@@ -30,27 +42,37 @@ public class Zip {
 		}else{
 			worldDir = new File(savesDir, defaultWorld + File.separator + worldName);
 		}
+	}
+	
+	public void save(){
+		Main.getLog().info("Backing up " + worldName);
 
-		File backupDir = new File("config" + File.separator + Resource.ID.toLowerCase() + File.separator + "backups" + File.separator + worldName);
+		for(Player player : Main.getGame().getServer().getOnlinePlayers()){
+			if(!player.hasPermission("worldbackup.notify")){
+				continue;
+			}
+			
+			player.sendMessage(Text.of(TextColors.GREEN, "[World Backup] ", TextColors.YELLOW, "backing up ", worldName, ". There may be lag."));
+		}
 		
-    	if (!backupDir.isDirectory()) {
-    		backupDir.mkdirs();
-    	}
-    	
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").withZone(ZoneId.systemDefault());
 
-		String zipFile = backupDir.getAbsolutePath() + File.separator + worldName + "_" + formatter.format(Instant.now()) + ".zip";
+		String zipFile = this.backupDir.getAbsolutePath() + File.separator + this.worldName + "_" + formatter.format(Instant.now()) + ".zip";
 
 		try {
 			FileOutputStream fileOutputStream = new FileOutputStream(zipFile);
 			ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
-			addDir(worldName, worldDir, zipOutputStream);
+			addDir(this.worldDir, zipOutputStream);
 			zipOutputStream.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		List<File> backups = Arrays.asList(backupDir.listFiles());
+		deleteOld();
+	}
+
+	private void deleteOld(){
+		List<File> backups = Arrays.asList(this.backupDir.listFiles());
 
 		Collections.sort(backups, new FileComparator());
 
@@ -64,8 +86,8 @@ public class Zip {
 			}
 		}
 	}
-
-	private static void addDir(String worldName, File directory, ZipOutputStream zipOutputStream) throws IOException {
+	
+	private void addDir(File directory, ZipOutputStream zipOutputStream) throws IOException {
 		File[] files = directory.listFiles();
 		byte[] buffer = new byte[1024];
 
@@ -73,7 +95,7 @@ public class Zip {
 			if (files[i].isDirectory()) {
 				String name = files[i].getName();
 				if(!Main.getGame().getServer().getWorldProperties(name).isPresent()){
-					addDir(worldName, files[i], zipOutputStream);
+					addDir(files[i], zipOutputStream);
 				}
 				continue;
 			}
@@ -82,7 +104,7 @@ public class Zip {
 			
 			String relativePath = files[i].getAbsolutePath().replace(Main.getGame().getSavesDirectory().toFile().getAbsolutePath(), "").replace(" ", "")
 					.replace(File.separator + Main.getGame().getServer().getDefaultWorldName() + File.separator, "")
-					.replace(worldName + File.separator, "");
+					.replace(this.worldName + File.separator, "");
 
 			zipOutputStream.putNextEntry(new ZipEntry(relativePath));
 			
