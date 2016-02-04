@@ -72,7 +72,7 @@ public class Zip {
 		for (int i = 0; i < files.length; i++) {
 			if (files[i].isDirectory()) {
 				String name = files[i].getName();
-				if(!Main.getGame().getServer().getWorld(name).isPresent()){
+				if(!Main.getGame().getServer().getWorldProperties(name).isPresent()){
 					addDir(worldName, files[i], zipOutputStream);
 				}
 				continue;
