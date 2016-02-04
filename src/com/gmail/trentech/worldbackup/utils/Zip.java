@@ -27,10 +27,10 @@ public class Zip {
 	
 	public Zip(String worldName){
 		this.worldName = worldName;
-		this.backupDir = new File("config" + File.separator + Resource.ID.toLowerCase() + File.separator + "backups" + File.separator + worldName);
+		this.backupDir = new File("config" + File.separator + Resource.ID.toLowerCase() + File.separator + "backups" + File.separator + this.worldName);
 		
-    	if (!backupDir.isDirectory()) {
-    		backupDir.mkdirs();
+    	if (!this.backupDir.isDirectory()) {
+    		this.backupDir.mkdirs();
     	}
     	
 		File savesDir = Main.getGame().getSavesDirectory().toFile();
@@ -38,21 +38,21 @@ public class Zip {
 		String defaultWorld = Main.getGame().getServer().getDefaultWorldName();
 		
 		if(worldName.equalsIgnoreCase(defaultWorld)){
-			worldDir = new File(savesDir, worldName);
+			this.worldDir = new File(savesDir, this.worldName);
 		}else{
-			worldDir = new File(savesDir, defaultWorld + File.separator + worldName);
+			this.worldDir = new File(savesDir, defaultWorld + File.separator + this.worldName);
 		}
 	}
 	
 	public void save(){
-		Main.getLog().info("Backing up " + worldName);
+		Main.getLog().info("Backing up " + this.worldName);
 
 		for(Player player : Main.getGame().getServer().getOnlinePlayers()){
 			if(!player.hasPermission("worldbackup.notify")){
 				continue;
 			}
 			
-			player.sendMessage(Text.of(TextColors.GREEN, "[World Backup] ", TextColors.YELLOW, "backing up ", worldName, ". There may be lag."));
+			player.sendMessage(Text.of(TextColors.GREEN, "[World Backup] ", TextColors.YELLOW, "backing up ", this.worldName, ". There may be lag."));
 		}
 		
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").withZone(ZoneId.systemDefault());

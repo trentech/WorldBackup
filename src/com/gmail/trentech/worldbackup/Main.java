@@ -18,6 +18,7 @@ import org.spongepowered.api.event.game.state.GameStoppedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.world.storage.WorldProperties;
 
 import com.gmail.trentech.worldbackup.commands.CommandManager;
 import com.gmail.trentech.worldbackup.utils.ConfigManager;
@@ -71,7 +72,13 @@ public class Main {
 			int interval = (int) ((date.getTime() - new Date().getTime()) / 1000);
 			
 			while(interval <= 0){
-				new Zip(worldName).save();
+				if(worldName.equalsIgnoreCase("all")){
+					for(WorldProperties properties : Main.getGame().getServer().getAllWorldProperties()){
+						new Zip(properties.getWorldName()).save();
+					}
+				}else{
+					new Zip(worldName).save();
+				}
 
 				interval = node.getNode("interval").getInt();
 				
@@ -124,8 +131,14 @@ public class Main {
         Main.getGame().getScheduler().createTaskBuilder().delay(interval, TimeUnit.SECONDS).name(name).execute(new Runnable() {
 
 			@Override
-            public void run() {			
-				new Zip(worldName).save();
+            public void run() {
+				if(worldName.equalsIgnoreCase("all")){
+					for(WorldProperties properties : Main.getGame().getServer().getAllWorldProperties()){
+						new Zip(properties.getWorldName()).save();
+					}
+				}else{
+					new Zip(worldName).save();
+				}
 
 				Calendar calendar = Calendar.getInstance();
 				calendar.add(Calendar.SECOND, interval);

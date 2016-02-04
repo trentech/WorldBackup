@@ -31,6 +31,7 @@ public class CMDBackup implements CommandExecutor {
 			List<Text> list = new ArrayList<>();
 			
 			list.add(Text.of(TextColors.YELLOW, " /backup <world>"));
+			list.add(Text.of(TextColors.YELLOW, " /backup all"));
 			
 			if(src.hasPermission("worldbackup.cmd.backup.create")) {
 				list.add(Text.builder().color(TextColors.GREEN).onHover(TextActions.showText(Text.of("Click command for more information ")))
@@ -51,10 +52,21 @@ public class CMDBackup implements CommandExecutor {
 
 			return CommandResult.success();
 		}
-		String worldName = args.<WorldProperties>getOne("world").get().getWorldName();
-
-		new Zip(worldName).save();
+		String worldName = args.<String>getOne("world").get();
 		
+		if(!worldName.equalsIgnoreCase("all") && !Main.getGame().getServer().getWorldProperties(worldName).isPresent()){
+			src.sendMessage(Text.of(TextColors.DARK_RED, worldName, " does not exist"));
+			return CommandResult.empty();
+		}
+
+		if(worldName.equalsIgnoreCase("all")){
+			for(WorldProperties properties : Main.getGame().getServer().getAllWorldProperties()){
+				new Zip(properties.getWorldName()).save();
+			}
+		}else{
+			new Zip(worldName).save();
+		}
+
 		return CommandResult.success();
 	}
 }

@@ -12,7 +12,6 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.storage.WorldProperties;
 
 import com.gmail.trentech.worldbackup.Main;
 import com.gmail.trentech.worldbackup.utils.ConfigManager;
@@ -26,7 +25,7 @@ public class CMDCreate implements CommandExecutor {
 	public CMDCreate(){
 		Help help = new Help("create", "create", " Create a scheduled world backup");
 		help.setSyntax(" /backup create <name> <world> <interval>\n /b c <name> <world> <interval>");
-		help.setExample(" /backup create MyTask world 30m\n /backup create MyTask world 1d,6h,5m,10s");
+		help.setExample(" /backup create MyTask world 30m\n  /backup create MyTask all 30m\n /backup create MyTask world 1d,6h,5m,10s");
 		help.save();
 	}
 	
@@ -50,7 +49,12 @@ public class CMDCreate implements CommandExecutor {
 			src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <name> <world> <interval>"));
 			return CommandResult.empty();
 		}
-		String worldName = args.<WorldProperties>getOne("world").get().getWorldName();
+		String worldName = args.<String>getOne("world").get();
+		
+		if(!worldName.equalsIgnoreCase("all") && !Main.getGame().getServer().getWorldProperties(worldName).isPresent()){
+			src.sendMessage(Text.of(TextColors.DARK_RED, worldName, " does not exist"));
+			return CommandResult.empty();
+		}
 		
 		if(!args.hasAny("interval")) {
 			src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <name> <world> <interval>"));
