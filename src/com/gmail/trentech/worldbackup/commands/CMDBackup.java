@@ -26,12 +26,13 @@ public class CMDBackup implements CommandExecutor {
 		if(!args.hasAny("world")) {
 			PaginationBuilder pages = Main.getGame().getServiceManager().provide(PaginationService.class).get().builder();
 
-			pages.title(Text.builder().color(TextColors.DARK_GREEN).append(Text.of(TextColors.AQUA, "Commands")).build());
+			pages.title(Text.builder().color(TextColors.DARK_GREEN).append(Text.of(TextColors.GREEN, "Commands")).build());
 			
 			List<Text> list = new ArrayList<>();
 			
-			list.add(Text.of(TextColors.YELLOW, " /backup <world>"));
+			list.add(Text.of(TextColors.YELLOW, " /backup <source>"));
 			list.add(Text.of(TextColors.YELLOW, " /backup all"));
+			list.add(Text.of(TextColors.YELLOW, " /backup server"));
 			
 			if(src.hasPermission("worldbackup.cmd.backup.create")) {
 				list.add(Text.builder().color(TextColors.GREEN).onHover(TextActions.showText(Text.of("Click command for more information ")))
@@ -52,19 +53,19 @@ public class CMDBackup implements CommandExecutor {
 
 			return CommandResult.success();
 		}
-		String worldName = args.<String>getOne("world").get();
+		String source = args.<String>getOne("source").get();
 		
-		if(!worldName.equalsIgnoreCase("all") && !Main.getGame().getServer().getWorldProperties(worldName).isPresent()){
-			src.sendMessage(Text.of(TextColors.DARK_RED, worldName, " does not exist"));
+		if(!source.equalsIgnoreCase("server") && !source.equalsIgnoreCase("all") && !Main.getGame().getServer().getWorldProperties(source).isPresent()){
+			src.sendMessage(Text.of(TextColors.DARK_RED, source, " does not exist"));
 			return CommandResult.empty();
 		}
 
-		if(worldName.equalsIgnoreCase("all")){
+		if(source.equalsIgnoreCase("all")){
 			for(WorldProperties properties : Main.getGame().getServer().getAllWorldProperties()){
 				new Zip(properties.getWorldName()).save();
 			}
 		}else{
-			new Zip(worldName).save();
+			new Zip(source).save();
 		}
 
 		return CommandResult.success();

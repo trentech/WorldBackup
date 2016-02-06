@@ -24,15 +24,15 @@ public class CMDCreate implements CommandExecutor {
 
 	public CMDCreate(){
 		Help help = new Help("create", "create", " Create a scheduled world backup");
-		help.setSyntax(" /backup create <name> <world> <interval>\n /b c <name> <world> <interval>");
-		help.setExample(" /backup create MyTask world 30m\n  /backup create MyTask all 30m\n /backup create MyTask world 1d,6h,5m,10s");
+		help.setSyntax(" /backup create <name> <source> <interval> [delay]\n /b c <name> <source> <interval> [delay]");
+		help.setExample(" /backup create MyTask world 30m\n  /backup create MyTask all 30m 5m\n /backup create MyTask server 1d,6h,5m,10s");
 		help.save();
 	}
 	
 	@Override
 	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
 		if(!args.hasAny("name")) {
-			src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <name> <world> <interval>"));
+			src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <name> <source> <interval> [delay]"));
 			return CommandResult.empty();
 		}
 		String name = args.<String>getOne("name").get();
@@ -45,35 +45,45 @@ public class CMDCreate implements CommandExecutor {
 			return CommandResult.empty();
 		}
 		
-		if(!args.hasAny("world")) {
-			src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <name> <world> <interval>"));
+		if(!args.hasAny("source")) {
+			src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <name> <source> <interval>"));
 			return CommandResult.empty();
 		}
-		String worldName = args.<String>getOne("world").get();
+		String source = args.<String>getOne("source").get();
 		
-		if(!worldName.equalsIgnoreCase("all") && !Main.getGame().getServer().getWorldProperties(worldName).isPresent()){
-			src.sendMessage(Text.of(TextColors.DARK_RED, worldName, " does not exist"));
+		if(!source.equalsIgnoreCase("server") && !source.equalsIgnoreCase("all") && !Main.getGame().getServer().getWorldProperties(source).isPresent()){
+			src.sendMessage(Text.of(TextColors.DARK_RED, source, " does not exist"));
 			return CommandResult.empty();
 		}
 		
 		if(!args.hasAny("interval")) {
-			src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <name> <world> <interval>"));
+			src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <name> <source> <interval>"));
 			return CommandResult.empty();
 		}
-		String time = args.<String>getOne("interval").get();
+		String interval = args.<String>getOne("interval").get();
 		
-		Optional<Integer> optionalTime = Utils.getTimeInSeconds(time);
+		Optional<Integer> optionalSeconds = Utils.getTimeInSeconds(interval);
 		
-		if(!Utils.getTimeInSeconds(time).isPresent()){
+		if(!optionalSeconds.isPresent()){
 			src.sendMessage(Text.of(TextColors.DARK_RED, "Invalid time"));
-			src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <name> <world> <interval>"));
+			src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <name> <source> <interval>"));
 			return CommandResult.empty();
-		}
+		}		
+		int seconds = optionalSeconds.get();
 		
-		int seconds = optionalTime.get();
-		
-		config.getNode("schedulers", name, "world").setValue(worldName);
+		config.getNode("schedulers", name, "source").setValue(source);
 		config.getNode("schedulers", name, "interval").setValue(seconds);
+		
+		if(args.hasAny("delay")) {
+			Optional<Integer> optionalDelay = Utils.getTimeInSeconds(args.<String>getOne("delay").get());
+			
+			if(!optionalDelay.isPresent()){
+				src.sendMessage(Text.of(TextColors.DARK_RED, "Invalid delay"));
+				src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <name> <source> <interval> [delay]"));
+				return CommandResult.empty();
+			}
+			seconds = optionalDelay.get();
+		}
 
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.SECOND, seconds);
@@ -85,7 +95,7 @@ public class CMDCreate implements CommandExecutor {
 		
 		configManager.save();
 		
-		Main.createTask(name, worldName, seconds);
+		Main.createTask(name, source, seconds);
 		
 		src.sendMessage(Text.of(TextColors.DARK_GREEN, "Scheduled backup created"));
 		

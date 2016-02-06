@@ -47,7 +47,7 @@ public class Utils {
 			}
 			time = weeks + wks;
 		}
-		if(days > 0 || (days == 0 && weeks > 0)) {
+		if(days > 0) {
 			String dys = " Days";
 			if(days == 1) {
 				dys = " Day";
@@ -58,7 +58,7 @@ public class Utils {
 				time = days + dys;
 			}
 		}		
-		if((hours > 0) || (hours == 0 && days > 0)) {
+		if(hours > 0) {
 			String hrs = " Hours";
 			if(hours == 1) {
 				hrs = " Hour";
@@ -69,7 +69,7 @@ public class Utils {
 				time = hours + hrs;
 			}		
 		}
-		if((minutes > 0) || (minutes == 0 && days > 0) || (minutes == 0 && hours > 0)) {
+		if(minutes > 0) {
 			String min = " Minutes";
 			if(minutes == 1) {
 				min = " Minute";
@@ -86,7 +86,7 @@ public class Utils {
 				sec = " Second";
 			}
 			if(time != null) {
-				time = time + " and " + seconds + sec;
+				time = time + ", " + seconds + sec;
 			}else{
 				time = seconds + sec;
 			}			

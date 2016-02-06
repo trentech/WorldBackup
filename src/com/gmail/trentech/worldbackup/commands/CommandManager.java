@@ -9,8 +9,9 @@ public class CommandManager {
 	public CommandSpec cmdCreate = CommandSpec.builder()
 		    .permission("worldbackup.cmd.backup.create")
 		    .arguments(GenericArguments.optional(GenericArguments.string(Text.of("name"))),
-		    		GenericArguments.optional(GenericArguments.string(Text.of("world"))),
-		    		GenericArguments.optional(GenericArguments.string(Text.of("interval"))))
+		    		GenericArguments.optional(GenericArguments.string(Text.of("source"))),
+		    		GenericArguments.optional(GenericArguments.string(Text.of("interval"))),
+		    		GenericArguments.optional(GenericArguments.string(Text.of("delay"))))
 		    .executor(new CMDCreate())
 		    .build();
 	
