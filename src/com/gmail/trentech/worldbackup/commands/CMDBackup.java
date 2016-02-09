@@ -16,14 +16,14 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.storage.WorldProperties;
 
 import com.gmail.trentech.worldbackup.Main;
+import com.gmail.trentech.worldbackup.data.Zip;
 import com.gmail.trentech.worldbackup.utils.Help;
-import com.gmail.trentech.worldbackup.utils.Zip;
 
 public class CMDBackup implements CommandExecutor {
 
 	@Override
 	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-		if(!args.hasAny("world")) {
+		if(!args.hasAny("source")) {
 			PaginationBuilder pages = Main.getGame().getServiceManager().provide(PaginationService.class).get().builder();
 
 			pages.title(Text.builder().color(TextColors.DARK_GREEN).append(Text.of(TextColors.GREEN, "Commands")).build());
@@ -32,7 +32,6 @@ public class CMDBackup implements CommandExecutor {
 			
 			list.add(Text.of(TextColors.YELLOW, " /backup <source>"));
 			list.add(Text.of(TextColors.YELLOW, " /backup all"));
-			list.add(Text.of(TextColors.YELLOW, " /backup server"));
 			
 			if(src.hasPermission("worldbackup.cmd.backup.create")) {
 				list.add(Text.builder().color(TextColors.GREEN).onHover(TextActions.showText(Text.of("Click command for more information ")))
@@ -55,7 +54,7 @@ public class CMDBackup implements CommandExecutor {
 		}
 		String source = args.<String>getOne("source").get();
 		
-		if(!source.equalsIgnoreCase("server") && !source.equalsIgnoreCase("all") && !Main.getGame().getServer().getWorldProperties(source).isPresent()){
+		if(!source.equalsIgnoreCase("all") && !Main.getGame().getServer().getWorldProperties(source).isPresent()){
 			src.sendMessage(Text.of(TextColors.DARK_RED, source, " does not exist"));
 			return CommandResult.empty();
 		}

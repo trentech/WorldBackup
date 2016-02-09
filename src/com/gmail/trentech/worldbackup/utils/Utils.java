@@ -30,16 +30,18 @@ public class Utils {
 		return returnTime;
 	}
 
-	public static String getReadableTime(int timeInSec) {
-		int weeks = timeInSec / 604800;
-		int wRemainder = timeInSec % 604800;
-		int days = wRemainder / 86400;
-		int dRemainder = wRemainder % 86400;
-		int hours = dRemainder / 3600;
-		int hRemainder = dRemainder % 3600;
-		int minutes = hRemainder / 60;
-		int seconds = hRemainder % 60;
+	public static String getReadableTime(long interval) {
+		long weeks = interval / 604800;
+		long wRemainder = interval % 604800;
+		long days = wRemainder / 86400;
+		long dRemainder = wRemainder % 86400;
+		long hours = dRemainder / 3600;
+		long hRemainder = dRemainder % 3600;
+		long minutes = hRemainder / 60;
+		long seconds = hRemainder % 60;
+		
 		String time = null;	
+		
 		if(weeks > 0) {
 			String wks = " Weeks";
 			if(weeks == 1) {

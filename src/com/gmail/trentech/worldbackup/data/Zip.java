@@ -1,4 +1,4 @@
-package com.gmail.trentech.worldbackup.utils;
+package com.gmail.trentech.worldbackup.data;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,13 +21,14 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import com.gmail.trentech.worldbackup.Main;
+import com.gmail.trentech.worldbackup.utils.Resource;
 
 public class Zip {
 
-	String worldName;
-	File backupDir;
-	File worldDir;
-	
+	private String worldName;
+	private File backupDir;
+	private File worldDir;
+
 	public Zip(String worldName){
 		this.worldName = worldName;
 		this.backupDir = new File("config" + File.separator + Resource.ID.toLowerCase() + File.separator + "backups" + File.separator + this.worldName);
@@ -42,8 +43,6 @@ public class Zip {
 		
 		if(worldName.equalsIgnoreCase(defaultWorld)){
 			this.worldDir = new File(savesDir, this.worldName);
-		}else if(worldName.equalsIgnoreCase("server")){
-			this.worldDir = new File(".");
 		}else{
 			this.worldDir = new File(savesDir, defaultWorld + File.separator + this.worldName);
 		}
@@ -75,8 +74,6 @@ public class Zip {
 			e.printStackTrace();
 		}
 
-		deleteOld();
-		
 		for(Player player : players){
 			if(!player.hasPermission("worldbackup.notify")){
 				continue;
@@ -86,12 +83,10 @@ public class Zip {
 		}
 	}
 
-	private void deleteOld(){
+	public void clean(int keep){
 		List<File> backups = Arrays.asList(this.backupDir.listFiles());
 
 		Collections.sort(backups, new FileComparator());
-
-		int keep = new ConfigManager().getConfig().getNode("settings", "keep").getInt();
 
 		if(backups.size() > keep){
 			int run = backups.size() - keep;
@@ -108,15 +103,12 @@ public class Zip {
 
 		for (int i = 0; i < files.length; i++) {
 			if (files[i].isDirectory()) {
-				String name = files[i].getName();
+				String worldName = files[i].getName();
 				
-				if(this.worldName.equalsIgnoreCase("server")){
-					if(!files[i].getAbsolutePath().contains("config" + File.separator + Resource.ID.toLowerCase() + File.separator + "backups")){
-						addDir(files[i], zipOutputStream);
-					}
-				}else if(!Main.getGame().getServer().getWorldProperties(name).isPresent()){
+				if(!Main.getGame().getServer().getWorldProperties(worldName).isPresent()){
 					addDir(files[i], zipOutputStream);
 				}
+				
 				continue;
 			}
 			

@@ -1,8 +1,8 @@
 package com.gmail.trentech.worldbackup.commands;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -15,11 +15,9 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import com.gmail.trentech.worldbackup.Main;
-import com.gmail.trentech.worldbackup.utils.ConfigManager;
+import com.gmail.trentech.worldbackup.data.BackupData;
 import com.gmail.trentech.worldbackup.utils.Help;
 import com.gmail.trentech.worldbackup.utils.Utils;
-
-import ninja.leaping.configurate.ConfigurationNode;
 
 public class CMDList implements CommandExecutor {
 
@@ -38,25 +36,12 @@ public class CMDList implements CommandExecutor {
 
 		List<Text> list = new ArrayList<>();
 
-		ConfigurationNode config = new ConfigManager().getConfig();
-		
-    	ConfigurationNode schedulers = config.getNode("schedulers");
-    	
-		for(Entry<Object, ? extends ConfigurationNode> entry : schedulers.getChildrenMap().entrySet()){
-			String name = entry.getKey().toString();
-			
-			ConfigurationNode node = schedulers.getNode(name);
-			
-			String source = node.getNode("source").getString();
-			String next = node.getNode("next").getString();
-			int delay = node.getNode("interval").getInt();
-			
-			list.add(Text.of(TextColors.GREEN, "Name: ", TextColors.WHITE, name));
-			list.add(Text.of(TextColors.GREEN, "  - Source: ", TextColors.WHITE, source));
-			list.add(Text.of(TextColors.GREEN, "  - Interval: ", TextColors.WHITE, Utils.getReadableTime(delay)));
-			list.add(Text.of(TextColors.GREEN, "  - Next Run: ", TextColors.WHITE, next));
+		for(BackupData backupData : BackupData.all()){
+			list.add(Text.of(TextColors.GREEN, "Source: ", TextColors.WHITE, backupData.getSource()));
+			list.add(Text.of(TextColors.GREEN, "  - Interval: ", TextColors.WHITE, Utils.getReadableTime(backupData.getInterval())));
+			list.add(Text.of(TextColors.GREEN, "  - Next Run: ", TextColors.WHITE, new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(backupData.getNext())));
 		}
-
+		
 		if(list.isEmpty()){
 			list.add(Text.of(TextColors.YELLOW, " No scheduled backups"));
 		}

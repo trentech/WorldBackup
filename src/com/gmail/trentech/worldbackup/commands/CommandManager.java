@@ -8,8 +8,7 @@ public class CommandManager {
 
 	public CommandSpec cmdCreate = CommandSpec.builder()
 		    .permission("worldbackup.cmd.backup.create")
-		    .arguments(GenericArguments.optional(GenericArguments.string(Text.of("name"))),
-		    		GenericArguments.optional(GenericArguments.string(Text.of("source"))),
+		    .arguments(GenericArguments.optional(GenericArguments.string(Text.of("source"))),
 		    		GenericArguments.optional(GenericArguments.string(Text.of("interval"))),
 		    		GenericArguments.optional(GenericArguments.string(Text.of("delay"))))
 		    .executor(new CMDCreate())
@@ -17,7 +16,7 @@ public class CommandManager {
 	
 	public CommandSpec cmdRemove = CommandSpec.builder()
 		    .permission("worldbackup.cmd.backup.remove")
-		    .arguments(GenericArguments.optional(GenericArguments.string(Text.of("name"))))
+		    .arguments(GenericArguments.optional(GenericArguments.string(Text.of("source"))))
 		    .executor(new CMDRemove())
 		    .build();
 	
@@ -28,7 +27,7 @@ public class CommandManager {
 	
 	public CommandSpec cmdBackup = CommandSpec.builder()
 		    .permission("worldbackup.cmd.backup")
-		    .arguments(GenericArguments.optional(GenericArguments.string(Text.of("world"))))
+		    .arguments(GenericArguments.optional(GenericArguments.string(Text.of("source"))))
 		    .child(cmdCreate, "create", "c")
 		    .child(cmdRemove, "remove", "r")
 		    .child(cmdList, "list", "l")
