@@ -21,7 +21,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import com.gmail.trentech.worldbackup.Main;
-import com.gmail.trentech.worldbackup.utils.Resource;
+import com.gmail.trentech.worldbackup.utils.ConfigManager;
 
 public class Zip {
 
@@ -31,7 +31,8 @@ public class Zip {
 
 	public Zip(String worldName){
 		this.worldName = worldName;
-		this.backupDir = new File("config" + File.separator + Resource.ID.toLowerCase() + File.separator + "backups" + File.separator + this.worldName);
+
+		this.backupDir = new File(new ConfigManager().getConfig().getNode("settings", "backup_directory").getString());
 		
     	if (!this.backupDir.isDirectory()) {
     		this.backupDir.mkdirs();
@@ -63,12 +64,13 @@ public class Zip {
 		
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").withZone(ZoneId.systemDefault());
 
-		String zipFile = this.backupDir.getAbsolutePath() + File.separator + this.worldName + "_" + formatter.format(Instant.now()) + ".zip";
+        String zipName = this.worldName + "_" + formatter.format(Instant.now()) + ".zip";
+		String zipFile = this.backupDir.getAbsolutePath() + File.separator + zipName;
 
 		try {
 			FileOutputStream fileOutputStream = new FileOutputStream(zipFile);
 			ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
-			addDir(this.worldDir, zipOutputStream);
+			addDir(this.worldDir, zipOutputStream, zipName);
 			zipOutputStream.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -81,6 +83,8 @@ public class Zip {
 			
 			player.sendMessage(Text.of(TextColors.GREEN, "[World Backup] ", TextColors.YELLOW, "Backup complete"));
 		}
+		
+		Main.getLog().info("Backup complete");
 	}
 
 	public void clean(int keep){
@@ -97,7 +101,7 @@ public class Zip {
 		}
 	}
 	
-	private void addDir(File directory, ZipOutputStream zipOutputStream) throws IOException {
+	private void addDir(File directory, ZipOutputStream zipOutputStream, String zipName) throws IOException {
 		File[] files = directory.listFiles();
 		byte[] buffer = new byte[1024];
 
@@ -106,7 +110,7 @@ public class Zip {
 				String worldName = files[i].getName();
 				
 				if(!Main.getGame().getServer().getWorldProperties(worldName).isPresent()){
-					addDir(files[i], zipOutputStream);
+					addDir(files[i], zipOutputStream, zipName);
 				}
 				
 				continue;
@@ -126,7 +130,7 @@ public class Zip {
 				while ((length = fileInputStream.read(buffer)) > 0) {
 					zipOutputStream.write(buffer, 0, length);
 				}
-				Main.getLog().info(relativePath);
+				Main.getLog().info(relativePath + " -> " + zipName);
 			}catch(Exception e){
 				Main.getLog().warn("Skipped: " + relativePath);
 			}

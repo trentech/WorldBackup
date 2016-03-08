@@ -46,7 +46,10 @@ public class ConfigManager {
 	
 	private void init() {
 		if(config.getNode("settings", "keep").getString() == null) {
-			config.getNode("settings", "keep").setValue(5);
+			config.getNode("settings", "keep").setValue(5).setComment("Number of backups to keep for each world");
+		}
+		if(config.getNode("settings", "backup_directory").getString() == null) {
+			config.getNode("settings", "backup_directory").setValue("config/worldbackup/backups").setComment("Directory where backups are stored.");
 		}
 		if(config.getNode("schedulers").getString() == null) {
 			config.getNode("schedulers").setComment("Automated backups");

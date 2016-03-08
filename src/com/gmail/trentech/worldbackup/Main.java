@@ -12,6 +12,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -26,7 +27,7 @@ import me.flibio.updatifier.Updatifier;
 import ninja.leaping.configurate.ConfigurationNode;
 
 @Updatifier(repoName = Resource.ID, repoOwner = "TrenTech", version = Resource.VERSION)
-@Plugin(id = Resource.ID, name = Resource.NAME, version = Resource.VERSION, dependencies = "after: Updatifier")
+@Plugin(id = Resource.ID, name = Resource.NAME, version = Resource.VERSION, dependencies = {@Dependency(id = "Updatifier", optional = true)})
 public class Main {
 
 	private static Game game;
@@ -37,7 +38,7 @@ public class Main {
     public void onPreInitialization(GamePreInitializationEvent event) {
 		game = Sponge.getGame();
 		plugin = getGame().getPluginManager().getPlugin(Resource.ID).get();
-		log = getGame().getPluginManager().getLogger(plugin);
+		log = getPlugin().getLogger();
     }
 
     @Listener
@@ -101,30 +102,26 @@ public class Main {
 		
 		long newInterval = config.getNode("schedulers", name, "interval").getLong();
 		
-        Main.getGame().getScheduler().createTaskBuilder().delay(interval, TimeUnit.SECONDS).name(name).execute(new Runnable() {
+        Main.getGame().getScheduler().createTaskBuilder().delay(interval, TimeUnit.SECONDS).name(name).execute(t -> {
+			Calendar calendar = Calendar.getInstance();
+			calendar.add(Calendar.SECOND, (int) interval);
+			
+			Date date = calendar.getTime();
+			
+			createTask(name, worldName, newInterval);
+			
+			String next = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
 
-			@Override
-            public void run() {
-				Calendar calendar = Calendar.getInstance();
-				calendar.add(Calendar.SECOND, (int) interval);
-				
-				Date date = calendar.getTime();
-				
-				createTask(name, worldName, newInterval);
-				
-				String next = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+			config.getNode("schedulers", name, "next").setValue(next);
 
-				config.getNode("schedulers", name, "next").setValue(next);
-
-				configManager.save();
-				
-				if(worldName.equalsIgnoreCase("all")){
-					for(WorldProperties properties : Main.getGame().getServer().getAllWorldProperties()){
-						new Zip(properties.getWorldName()).save();
-					}
-				}else{
-					new Zip(worldName).save();
+			configManager.save();
+			
+			if(worldName.equalsIgnoreCase("all")){
+				for(WorldProperties properties : Main.getGame().getServer().getAllWorldProperties()){
+					new Zip(properties.getWorldName()).save();
 				}
+			}else{
+				new Zip(worldName).save();
 			}
         }).submit(getPlugin());
 	}
