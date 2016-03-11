@@ -16,7 +16,7 @@ public class ConfigManager {
 	private ConfigurationLoader<CommentedConfigurationNode> loader;
 
 	public ConfigManager() {
-		String folder = "config" + File.separator + Resource.ID.toLowerCase();
+		String folder = "config" + File.separator + "worldBackup";
         if (!new File(folder).isDirectory()) {
         	new File(folder).mkdirs();
         }

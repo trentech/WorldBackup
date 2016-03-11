@@ -1,5 +1,5 @@
 .classpath
-*.gradle
+.gradle
 *.settings
 /build
 /bin
