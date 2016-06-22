@@ -29,42 +29,42 @@ public class Zip {
 	private File backupDir;
 	private File worldDir;
 
-	public Zip(String worldName){
+	public Zip(String worldName) {
 		this.worldName = worldName;
 
 		this.backupDir = new File(new ConfigManager().getConfig().getNode("settings", "backup_directory").getString());
-		
-    	if (!this.backupDir.isDirectory()) {
-    		this.backupDir.mkdirs();
-    	}
-    	
+
+		if (!this.backupDir.isDirectory()) {
+			this.backupDir.mkdirs();
+		}
+
 		File savesDir = Main.getGame().getSavesDirectory().toFile();
 
 		String defaultWorld = Main.getGame().getServer().getDefaultWorldName();
-		
-		if(worldName.equalsIgnoreCase(defaultWorld)){
+
+		if (worldName.equalsIgnoreCase(defaultWorld)) {
 			this.worldDir = new File(savesDir, this.worldName);
-		}else{
+		} else {
 			this.worldDir = new File(savesDir, defaultWorld + File.separator + this.worldName);
 		}
 	}
-	
-	public void save(){
+
+	public void save() {
 		Main.getLog().info("Backing up " + this.worldName);
 
 		Collection<Player> players = Main.getGame().getServer().getOnlinePlayers();
-		
-		for(Player player : players){
-			if(!player.hasPermission("worldbackup.notify")){
+
+		for (Player player : players) {
+			if (!player.hasPermission("worldbackup.notify")) {
 				continue;
 			}
-			
+
 			player.sendMessage(Text.of(TextColors.GREEN, "[World Backup] ", TextColors.YELLOW, "Backing up ", this.worldName, ". There may be lag."));
 		}
-		
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").withZone(ZoneId.systemDefault());
 
-        String zipName = this.worldName + "_" + formatter.format(Instant.now()) + ".zip";
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").withZone(ZoneId.systemDefault());
+
+		String zipName = this.worldName + "_" + formatter.format(Instant.now()) + ".zip";
 		String zipFile = this.backupDir.getAbsolutePath() + File.separator + zipName;
 
 		try {
@@ -76,31 +76,31 @@ public class Zip {
 			e.printStackTrace();
 		}
 
-		for(Player player : players){
-			if(!player.hasPermission("worldbackup.notify")){
+		for (Player player : players) {
+			if (!player.hasPermission("worldbackup.notify")) {
 				continue;
 			}
-			
+
 			player.sendMessage(Text.of(TextColors.GREEN, "[World Backup] ", TextColors.YELLOW, "Backup complete"));
 		}
-		
+
 		Main.getLog().info("Backup complete");
 	}
 
-	public void clean(int keep){
+	public void clean(int keep) {
 		List<File> backups = Arrays.asList(this.backupDir.listFiles());
 
 		Collections.sort(backups, new FileComparator());
 
-		if(backups.size() > keep){
+		if (backups.size() > keep) {
 			int run = backups.size() - keep;
 
-			for(int i = 0; i < run; i++){
+			for (int i = 0; i < run; i++) {
 				backups.get(i).delete();
 			}
 		}
 	}
-	
+
 	private void addDir(File directory, ZipOutputStream zipOutputStream, String zipName) throws IOException {
 		File[] files = directory.listFiles();
 		byte[] buffer = new byte[1024];
@@ -108,30 +108,30 @@ public class Zip {
 		for (int i = 0; i < files.length; i++) {
 			if (files[i].isDirectory()) {
 				String worldName = files[i].getName();
-				
-				if(!Main.getGame().getServer().getWorldProperties(worldName).isPresent()){
+
+				if (!Main.getGame().getServer().getWorldProperties(worldName).isPresent()) {
 					addDir(files[i], zipOutputStream, zipName);
 				}
-				
+
 				continue;
 			}
-			
+
 			FileInputStream fileInputStream = new FileInputStream(files[i]);
-			
+
 			Path absolutePath = Paths.get(files[i].getAbsolutePath());
-	        Path backupPath = Paths.get(this.backupDir.getAbsolutePath());
-	        String relativePath = backupPath.relativize(absolutePath).toString().replaceAll("\\.\\.\\" + File.separator, "").replaceFirst("\\.\\" + File.separator, "").replace(this.worldName + File.separator, "");
+			Path backupPath = Paths.get(this.backupDir.getAbsolutePath());
+			String relativePath = backupPath.relativize(absolutePath).toString().replaceAll("\\.\\.\\" + File.separator, "").replaceFirst("\\.\\" + File.separator, "").replace(this.worldName + File.separator, "");
 
 			zipOutputStream.putNextEntry(new ZipEntry(relativePath));
 
 			int length;
 
-			try{
+			try {
 				while ((length = fileInputStream.read(buffer)) > 0) {
 					zipOutputStream.write(buffer, 0, length);
 				}
 				Main.getLog().info(relativePath + " -> " + zipName);
-			}catch(Exception e){
+			} catch (Exception e) {
 				Main.getLog().warn("Skipped: " + relativePath);
 			}
 

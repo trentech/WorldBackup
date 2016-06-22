@@ -23,47 +23,44 @@ public class CMDBackup implements CommandExecutor {
 
 	@Override
 	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-		if(!args.hasAny("source")) {
+		if (!args.hasAny("source")) {
 			Builder pages = Main.getGame().getServiceManager().provide(PaginationService.class).get().builder();
 
 			pages.title(Text.builder().color(TextColors.DARK_GREEN).append(Text.of(TextColors.GREEN, "Commands")).build());
-			
+
 			List<Text> list = new ArrayList<>();
-			
+
 			list.add(Text.of(TextColors.YELLOW, " /backup <world>"));
 			list.add(Text.of(TextColors.YELLOW, " /backup all"));
-			
-			if(src.hasPermission("worldbackup.cmd.backup.create")) {
-				list.add(Text.builder().color(TextColors.GREEN).onHover(TextActions.showText(Text.of("Click command for more information ")))
-						.onClick(TextActions.executeCallback(Help.getHelp("create"))).append(Text.of(" /backup create")).build());
+
+			if (src.hasPermission("worldbackup.cmd.backup.create")) {
+				list.add(Text.builder().color(TextColors.GREEN).onHover(TextActions.showText(Text.of("Click command for more information "))).onClick(TextActions.executeCallback(Help.getHelp("create"))).append(Text.of(" /backup create")).build());
 			}
-			if(src.hasPermission("worldbackup.cmd.backup.remove")) {
-				list.add(Text.builder().color(TextColors.GREEN).onHover(TextActions.showText(Text.of("Click command for more information ")))
-						.onClick(TextActions.executeCallback(Help.getHelp("remove"))).append(Text.of(" /backup remove")).build());
+			if (src.hasPermission("worldbackup.cmd.backup.remove")) {
+				list.add(Text.builder().color(TextColors.GREEN).onHover(TextActions.showText(Text.of("Click command for more information "))).onClick(TextActions.executeCallback(Help.getHelp("remove"))).append(Text.of(" /backup remove")).build());
 			}
-			if(src.hasPermission("worldbackup.cmd.backup.list")) {
-				list.add(Text.builder().color(TextColors.GREEN).onHover(TextActions.showText(Text.of("Click command for more information ")))
-						.onClick(TextActions.executeCallback(Help.getHelp("list"))).append(Text.of(" /backup list")).build());
+			if (src.hasPermission("worldbackup.cmd.backup.list")) {
+				list.add(Text.builder().color(TextColors.GREEN).onHover(TextActions.showText(Text.of("Click command for more information "))).onClick(TextActions.executeCallback(Help.getHelp("list"))).append(Text.of(" /backup list")).build());
 			}
 
 			pages.contents(list);
-			
+
 			pages.sendTo(src);
 
 			return CommandResult.success();
 		}
-		String source = args.<String>getOne("source").get();
-		
-		if(!source.equalsIgnoreCase("all") && !Main.getGame().getServer().getWorldProperties(source).isPresent()){
+		String source = args.<String> getOne("source").get();
+
+		if (!source.equalsIgnoreCase("all") && !Main.getGame().getServer().getWorldProperties(source).isPresent()) {
 			src.sendMessage(Text.of(TextColors.DARK_RED, source, " does not exist"));
 			return CommandResult.empty();
 		}
 
-		if(source.equalsIgnoreCase("all")){
-			for(WorldProperties properties : Main.getGame().getServer().getAllWorldProperties()){
+		if (source.equalsIgnoreCase("all")) {
+			for (WorldProperties properties : Main.getGame().getServer().getAllWorldProperties()) {
 				new Zip(properties.getWorldName()).save();
 			}
-		}else{
+		} else {
 			new Zip(source).save();
 		}
 

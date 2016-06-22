@@ -15,32 +15,32 @@ import com.gmail.trentech.worldbackup.utils.Help;
 
 public class CMDRemove implements CommandExecutor {
 
-	public CMDRemove(){
+	public CMDRemove() {
 		Help help = new Help("remove", "remove", " Remove an existing scheduled world backup");
 		help.setSyntax(" /backup remove <name>\n /b r <name>");
 		help.setExample(" /backup remove MyTask");
 		help.save();
 	}
-	
+
 	@Override
 	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-		if(!args.hasAny("source")) {
+		if (!args.hasAny("source")) {
 			src.sendMessage(Text.of(TextColors.YELLOW, "/backup <name> <world> <time>"));
 			return CommandResult.empty();
 		}
-		String source = args.<String>getOne("source").get();
+		String source = args.<String> getOne("source").get();
 
 		Optional<BackupData> optionalBackupData = BackupData.get(source);
-		
-		if(!optionalBackupData.isPresent()){
+
+		if (!optionalBackupData.isPresent()) {
 			src.sendMessage(Text.of(TextColors.DARK_RED, source, " does not exist"));
 			return CommandResult.empty();
 		}
-		
+
 		optionalBackupData.get().delete();
-		
+
 		src.sendMessage(Text.of(TextColors.DARK_GREEN, "Scheduled backup removed"));
-		
+
 		return CommandResult.success();
 	}
 }

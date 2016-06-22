@@ -27,7 +27,7 @@ import me.flibio.updatifier.Updatifier;
 import ninja.leaping.configurate.ConfigurationNode;
 
 @Updatifier(repoName = Resource.ID, repoOwner = "TrenTech", version = Resource.VERSION)
-@Plugin(id = Resource.ID, name = Resource.NAME, authors = Resource.AUTHOR, url = Resource.URL, dependencies = {@Dependency(id = "Updatifier", optional = true)})
+@Plugin(id = Resource.ID, name = Resource.NAME, authors = Resource.AUTHOR, url = Resource.URL, dependencies = { @Dependency(id = "Updatifier", optional = true) })
 public class Main {
 
 	private static Game game;
@@ -35,26 +35,26 @@ public class Main {
 	private static PluginContainer plugin;
 
 	@Listener
-    public void onPreInitialization(GamePreInitializationEvent event) {
+	public void onPreInitialization(GamePreInitializationEvent event) {
 		game = Sponge.getGame();
 		plugin = getGame().getPluginManager().getPlugin(Resource.ID).get();
 		log = getPlugin().getLogger();
-    }
+	}
 
-    @Listener
-    public void onInitialization(GameInitializationEvent event) {
-    	getGame().getCommandManager().register(this, new CommandManager().cmdBackup, "backup");
-    }
+	@Listener
+	public void onInitialization(GameInitializationEvent event) {
+		getGame().getCommandManager().register(this, new CommandManager().cmdBackup, "backup");
+	}
 
-    @Listener
-    public void onStartedServer(GameStartedServerEvent event) {
-    	for(BackupData backupData : BackupData.all()){
-    		long interval = ((backupData.getNext().getTime() - new Date().getTime()) / 1000);
-    		
-			if(interval <= 0){
+	@Listener
+	public void onStartedServer(GameStartedServerEvent event) {
+		for (BackupData backupData : BackupData.all()) {
+			long interval = ((backupData.getNext().getTime() - new Date().getTime()) / 1000);
+
+			if (interval <= 0) {
 				Calendar calendar = Calendar.getInstance();
-				
-				while(interval <= 0){
+
+				while (interval <= 0) {
 					interval = backupData.getInterval();
 
 					calendar.setTime(backupData.getNext());
@@ -65,29 +65,29 @@ public class Main {
 
 					interval = ((date.getTime() - new Date().getTime()) / 1000);
 				}
-				
+
 				backupData.start(interval);
 
 				String source = backupData.getSource();
-				
-				if(source.equalsIgnoreCase("all")){
-					for(WorldProperties properties : Main.getGame().getServer().getAllWorldProperties()){
+
+				if (source.equalsIgnoreCase("all")) {
+					for (WorldProperties properties : Main.getGame().getServer().getAllWorldProperties()) {
 						new Zip(properties.getWorldName()).save();
 					}
-				}else{
+				} else {
 					new Zip(source).save();
 				}
 				continue;
 			}
 
 			backupData.start(interval);
-    	}
-    }
+		}
+	}
 
-    public static Logger getLog() {
-        return log;
-    }
-    
+	public static Logger getLog() {
+		return log;
+	}
+
 	public static Game getGame() {
 		return game;
 	}
@@ -95,34 +95,34 @@ public class Main {
 	public static PluginContainer getPlugin() {
 		return plugin;
 	}
-	
-	public static void createTask(String name, String worldName, long interval){
+
+	public static void createTask(String name, String worldName, long interval) {
 		ConfigManager configManager = new ConfigManager();
 		ConfigurationNode config = configManager.getConfig();
-		
+
 		long newInterval = config.getNode("schedulers", name, "interval").getLong();
-		
-        Main.getGame().getScheduler().createTaskBuilder().delay(interval, TimeUnit.SECONDS).name(name).execute(t -> {
+
+		Main.getGame().getScheduler().createTaskBuilder().delay(interval, TimeUnit.SECONDS).name(name).execute(t -> {
 			Calendar calendar = Calendar.getInstance();
 			calendar.add(Calendar.SECOND, (int) interval);
-			
+
 			Date date = calendar.getTime();
-			
+
 			createTask(name, worldName, newInterval);
-			
+
 			String next = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
 
 			config.getNode("schedulers", name, "next").setValue(next);
 
 			configManager.save();
-			
-			if(worldName.equalsIgnoreCase("all")){
-				for(WorldProperties properties : Main.getGame().getServer().getAllWorldProperties()){
+
+			if (worldName.equalsIgnoreCase("all")) {
+				for (WorldProperties properties : Main.getGame().getServer().getAllWorldProperties()) {
 					new Zip(properties.getWorldName()).save();
 				}
-			}else{
+			} else {
 				new Zip(worldName).save();
 			}
-        }).submit(getPlugin());
+		}).submit(getPlugin());
 	}
 }

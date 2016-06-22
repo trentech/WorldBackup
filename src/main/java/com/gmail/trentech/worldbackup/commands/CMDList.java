@@ -21,35 +21,35 @@ import com.gmail.trentech.worldbackup.utils.Utils;
 
 public class CMDList implements CommandExecutor {
 
-	public CMDList(){
+	public CMDList() {
 		Help help = new Help("list", "list", " List all scheduled world backups");
 		help.setSyntax(" /backup list\n /b l");
 		help.setExample(" /backup list");
 		help.save();
 	}
-	
+
 	@Override
 	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
 		Builder pages = Main.getGame().getServiceManager().provide(PaginationService.class).get().builder();
-		
+
 		pages.title(Text.builder().color(TextColors.DARK_GREEN).append(Text.of(TextColors.GREEN, "Backups")).build());
 
 		List<Text> list = new ArrayList<>();
 
-		for(BackupData backupData : BackupData.all()){
+		for (BackupData backupData : BackupData.all()) {
 			list.add(Text.of(TextColors.GREEN, "Source: ", TextColors.WHITE, backupData.getSource()));
 			list.add(Text.of(TextColors.GREEN, "  - Interval: ", TextColors.WHITE, Utils.getReadableTime(backupData.getInterval())));
 			list.add(Text.of(TextColors.GREEN, "  - Next Run: ", TextColors.WHITE, new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(backupData.getNext())));
 		}
-		
-		if(list.isEmpty()){
+
+		if (list.isEmpty()) {
 			list.add(Text.of(TextColors.YELLOW, " No scheduled backups"));
 		}
-		
+
 		pages.contents(list);
-		
+
 		pages.sendTo(src);
-		
+
 		return CommandResult.success();
 	}
 }
