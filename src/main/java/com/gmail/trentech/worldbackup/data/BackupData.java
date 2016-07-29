@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.storage.WorldProperties;
 
@@ -112,7 +113,7 @@ public class BackupData {
 
 		configManager.save();
 
-		Set<Task> tasks = Main.getGame().getScheduler().getScheduledTasks();
+		Set<Task> tasks = Sponge.getScheduler().getScheduledTasks();
 
 		for (Task task : tasks) {
 			if (task.getName().equalsIgnoreCase(this.source)) {
@@ -125,7 +126,7 @@ public class BackupData {
 	public void start(long interval) {
 		long newInterval = this.interval;
 
-		Main.getGame().getScheduler().createTaskBuilder().delay(interval, TimeUnit.SECONDS).name(this.source).execute(new Runnable() {
+		Sponge.getScheduler().createTaskBuilder().delay(interval, TimeUnit.SECONDS).name(this.source).execute(new Runnable() {
 
 			@Override
 			public void run() {
@@ -139,7 +140,7 @@ public class BackupData {
 				setNext(date);
 
 				if (source.equalsIgnoreCase("all")) {
-					for (WorldProperties properties : Main.getGame().getServer().getAllWorldProperties()) {
+					for (WorldProperties properties : Sponge.getServer().getAllWorldProperties()) {
 						new Zip(properties.getWorldName()).save();
 					}
 				} else {

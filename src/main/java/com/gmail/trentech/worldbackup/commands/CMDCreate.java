@@ -2,6 +2,7 @@ package com.gmail.trentech.worldbackup.commands;
 
 import java.util.Optional;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -10,7 +11,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import com.gmail.trentech.worldbackup.Main;
 import com.gmail.trentech.worldbackup.data.BackupData;
 import com.gmail.trentech.worldbackup.utils.Help;
 import com.gmail.trentech.worldbackup.utils.Utils;
@@ -39,7 +39,7 @@ public class CMDCreate implements CommandExecutor {
 			return CommandResult.empty();
 		}
 
-		if (!source.equalsIgnoreCase("all") && !Main.getGame().getServer().getWorldProperties(source).isPresent()) {
+		if (!source.equalsIgnoreCase("all") && !Sponge.getServer().getWorldProperties(source).isPresent()) {
 			src.sendMessage(Text.of(TextColors.DARK_RED, source, " does not exist"));
 			return CommandResult.empty();
 		}

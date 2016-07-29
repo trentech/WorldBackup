@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
@@ -26,24 +25,22 @@ import com.gmail.trentech.worldbackup.utils.Resource;
 import me.flibio.updatifier.Updatifier;
 import ninja.leaping.configurate.ConfigurationNode;
 
-@Updatifier(repoName = Resource.ID, repoOwner = "TrenTech", version = Resource.VERSION)
-@Plugin(id = Resource.ID, name = Resource.NAME, authors = Resource.AUTHOR, url = Resource.URL, dependencies = { @Dependency(id = "Updatifier", optional = true) })
+@Updatifier(repoName = Resource.NAME, repoOwner = Resource.AUTHOR, version = Resource.VERSION)
+@Plugin(id = Resource.ID, name = Resource.NAME, version = Resource.VERSION, description = Resource.DESCRIPTION, authors = Resource.AUTHOR, url = Resource.URL, dependencies = { @Dependency(id = "Updatifier", optional = true) })
 public class Main {
 
-	private static Game game;
 	private static Logger log;
 	private static PluginContainer plugin;
 
 	@Listener
 	public void onPreInitialization(GamePreInitializationEvent event) {
-		game = Sponge.getGame();
-		plugin = getGame().getPluginManager().getPlugin(Resource.ID).get();
+		plugin = Sponge.getPluginManager().getPlugin(Resource.ID).get();
 		log = getPlugin().getLogger();
 	}
 
 	@Listener
 	public void onInitialization(GameInitializationEvent event) {
-		getGame().getCommandManager().register(this, new CommandManager().cmdBackup, "backup");
+		Sponge.getCommandManager().register(this, new CommandManager().cmdBackup, "backup");
 	}
 
 	@Listener
@@ -71,7 +68,7 @@ public class Main {
 				String source = backupData.getSource();
 
 				if (source.equalsIgnoreCase("all")) {
-					for (WorldProperties properties : Main.getGame().getServer().getAllWorldProperties()) {
+					for (WorldProperties properties : Sponge.getServer().getAllWorldProperties()) {
 						new Zip(properties.getWorldName()).save();
 					}
 				} else {
@@ -88,10 +85,6 @@ public class Main {
 		return log;
 	}
 
-	public static Game getGame() {
-		return game;
-	}
-
 	public static PluginContainer getPlugin() {
 		return plugin;
 	}
@@ -102,7 +95,7 @@ public class Main {
 
 		long newInterval = config.getNode("schedulers", name, "interval").getLong();
 
-		Main.getGame().getScheduler().createTaskBuilder().delay(interval, TimeUnit.SECONDS).name(name).execute(t -> {
+		Sponge.getScheduler().createTaskBuilder().delay(interval, TimeUnit.SECONDS).name(name).execute(t -> {
 			Calendar calendar = Calendar.getInstance();
 			calendar.add(Calendar.SECOND, (int) interval);
 
@@ -117,7 +110,7 @@ public class Main {
 			configManager.save();
 
 			if (worldName.equalsIgnoreCase("all")) {
-				for (WorldProperties properties : Main.getGame().getServer().getAllWorldProperties()) {
+				for (WorldProperties properties : Sponge.getServer().getAllWorldProperties()) {
 					new Zip(properties.getWorldName()).save();
 				}
 			} else {

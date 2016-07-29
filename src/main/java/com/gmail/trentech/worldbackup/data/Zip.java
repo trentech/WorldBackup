@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -38,9 +39,9 @@ public class Zip {
 			this.backupDir.mkdirs();
 		}
 
-		File savesDir = Main.getGame().getSavesDirectory().toFile();
+		File savesDir = Sponge.getGame().getSavesDirectory().toFile();
 
-		String defaultWorld = Main.getGame().getServer().getDefaultWorldName();
+		String defaultWorld = Sponge.getServer().getDefaultWorldName();
 
 		if (worldName.equalsIgnoreCase(defaultWorld)) {
 			this.worldDir = new File(savesDir, this.worldName);
@@ -52,7 +53,7 @@ public class Zip {
 	public void save() {
 		Main.getLog().info("Backing up " + this.worldName);
 
-		Collection<Player> players = Main.getGame().getServer().getOnlinePlayers();
+		Collection<Player> players = Sponge.getServer().getOnlinePlayers();
 
 		for (Player player : players) {
 			if (!player.hasPermission("worldbackup.notify")) {
@@ -109,7 +110,7 @@ public class Zip {
 			if (files[i].isDirectory()) {
 				String worldName = files[i].getName();
 
-				if (!Main.getGame().getServer().getWorldProperties(worldName).isPresent()) {
+				if (!Sponge.getServer().getWorldProperties(worldName).isPresent()) {
 					addDir(files[i], zipOutputStream, zipName);
 				}
 
