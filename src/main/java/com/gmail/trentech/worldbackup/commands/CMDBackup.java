@@ -9,8 +9,8 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.service.pagination.PaginationList.Builder;
-import org.spongepowered.api.service.pagination.PaginationService;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
@@ -24,10 +24,6 @@ public class CMDBackup implements CommandExecutor {
 	@Override
 	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
 		if (!args.hasAny("source")) {
-			Builder pages = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
-
-			pages.title(Text.builder().color(TextColors.DARK_GREEN).append(Text.of(TextColors.GREEN, "Commands")).build());
-
 			List<Text> list = new ArrayList<>();
 
 			list.add(Text.of(TextColors.YELLOW, " /backup <world>"));
@@ -43,9 +39,19 @@ public class CMDBackup implements CommandExecutor {
 				list.add(Text.builder().color(TextColors.GREEN).onHover(TextActions.showText(Text.of("Click command for more information "))).onClick(TextActions.executeCallback(Help.getHelp("list"))).append(Text.of(" /backup list")).build());
 			}
 
-			pages.contents(list);
+			if (src instanceof Player) {
+				PaginationList.Builder pages = PaginationList.builder();
 
-			pages.sendTo(src);
+				pages.title(Text.builder().color(TextColors.DARK_GREEN).append(Text.of(TextColors.GREEN, "Command List")).build());
+
+				pages.contents(list);
+
+				pages.sendTo(src);
+			} else {
+				for (Text text : list) {
+					src.sendMessage(text);
+				}
+			}
 
 			return CommandResult.success();
 		}

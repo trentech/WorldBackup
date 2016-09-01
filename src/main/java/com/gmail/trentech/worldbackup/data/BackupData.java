@@ -34,10 +34,10 @@ public class BackupData {
 		this.keep = keep;
 	}
 
-	public BackupData(String worldName, long interval) {
-		this.source = worldName;
+	public BackupData(String source, long interval) {
+		this.source = source;
 		this.interval = interval;
-		this.keep = new ConfigManager().getConfig().getNode("settings", "keep").getInt();
+		this.keep = ConfigManager.get().getConfig().getNode("settings", "keep").getInt();
 
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.SECOND, (int) interval);
@@ -45,7 +45,7 @@ public class BackupData {
 
 		this.next = date;
 
-		ConfigManager configManager = new ConfigManager();
+		ConfigManager configManager = ConfigManager.get();
 		ConfigurationNode config = configManager.getConfig();
 
 		config.getNode("schedulers", source, "interval").setValue(this.interval);
@@ -78,7 +78,7 @@ public class BackupData {
 
 		String next = format.format(date);
 
-		ConfigManager configManager = new ConfigManager();
+		ConfigManager configManager = ConfigManager.get();
 		ConfigurationNode config = configManager.getConfig();
 
 		config.getNode("schedulers", this.source, "next").setValue(next);
@@ -88,7 +88,7 @@ public class BackupData {
 	public void setInterval(long interval) {
 		this.interval = interval;
 
-		ConfigManager configManager = new ConfigManager();
+		ConfigManager configManager = ConfigManager.get();
 		ConfigurationNode config = configManager.getConfig();
 
 		config.getNode("schedulers", this.source, "interval").setValue(this.interval);
@@ -98,7 +98,7 @@ public class BackupData {
 	public void setKeep(int keep) {
 		this.keep = keep;
 
-		ConfigManager configManager = new ConfigManager();
+		ConfigManager configManager = ConfigManager.get();
 		ConfigurationNode config = configManager.getConfig();
 
 		config.getNode("schedulers", this.source, "keep").setValue(this.keep);
@@ -106,7 +106,7 @@ public class BackupData {
 	}
 
 	public void delete() {
-		ConfigManager configManager = new ConfigManager();
+		ConfigManager configManager = ConfigManager.get();
 		ConfigurationNode config = configManager.getConfig();
 
 		config.getNode("schedulers").removeChild(this.source);
@@ -149,11 +149,11 @@ public class BackupData {
 					zip.clean(keep);
 				}
 			}
-		}).submit(Main.getPlugin());
+		}).submit(Main.instance().getPlugin());
 	}
 
 	public static Optional<BackupData> get(String source) {
-		ConfigurationNode scheduler = new ConfigManager().getConfig().getNode("schedulers", source);
+		ConfigurationNode scheduler = ConfigManager.get().getConfig().getNode("schedulers", source);
 
 		if (scheduler.isVirtual()) {
 			return Optional.empty();
@@ -180,7 +180,7 @@ public class BackupData {
 	public static List<BackupData> all() {
 		ArrayList<BackupData> list = new ArrayList<>();
 
-		ConfigManager configManager = new ConfigManager();
+		ConfigManager configManager = ConfigManager.get();
 		ConfigurationNode config = configManager.getConfig();
 		ConfigurationNode schedulers = config.getNode("schedulers");
 

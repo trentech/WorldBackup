@@ -24,10 +24,6 @@ public class CMDRemove implements CommandExecutor {
 
 	@Override
 	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-		if (!args.hasAny("source")) {
-			src.sendMessage(Text.of(TextColors.YELLOW, "/backup <name> <world> <time>"));
-			return CommandResult.empty();
-		}
 		String source = args.<String> getOne("source").get();
 
 		Optional<BackupData> optionalBackupData = BackupData.get(source);

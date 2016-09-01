@@ -13,7 +13,6 @@ import org.spongepowered.api.text.format.TextColors;
 
 import com.gmail.trentech.worldbackup.data.BackupData;
 import com.gmail.trentech.worldbackup.utils.Help;
-import com.gmail.trentech.worldbackup.utils.Utils;
 
 public class CMDCreate implements CommandExecutor {
 
@@ -26,10 +25,6 @@ public class CMDCreate implements CommandExecutor {
 
 	@Override
 	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-		if (!args.hasAny("source")) {
-			src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <source> <interval> [delay]"));
-			return CommandResult.empty();
-		}
 		String source = args.<String> getOne("source").get();
 
 		Optional<BackupData> optionalBackupData = BackupData.get(source);
@@ -44,34 +39,15 @@ public class CMDCreate implements CommandExecutor {
 			return CommandResult.empty();
 		}
 
-		if (!args.hasAny("interval")) {
-			src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <source> <interval> [delay]"));
-			return CommandResult.empty();
-		}
-		String interval = args.<String> getOne("interval").get();
+		long interval = args.<Long> getOne("interval").get() * 60;
 
-		Optional<Integer> optionalSeconds = Utils.getTimeInSeconds(interval);
-
-		if (!optionalSeconds.isPresent()) {
-			src.sendMessage(Text.of(TextColors.DARK_RED, "Invalid time"));
-			src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <source> <interval> [delay]"));
-			return CommandResult.empty();
-		}
-		int seconds = optionalSeconds.get();
-
+		BackupData backupData = new BackupData(source, interval);
+		
 		if (args.hasAny("delay")) {
-			Optional<Integer> optionalDelay = Utils.getTimeInSeconds(args.<String> getOne("delay").get());
-
-			if (!optionalDelay.isPresent()) {
-				src.sendMessage(Text.of(TextColors.DARK_RED, "Invalid delay"));
-				src.sendMessage(Text.of(TextColors.YELLOW, "/backup create <source> <interval> [delay]"));
-				return CommandResult.empty();
-			}
-			seconds = optionalDelay.get();
+			backupData.start(args.<Long> getOne("delay").get());
+		} else {
+			backupData.start(0);
 		}
-
-		BackupData backupData = new BackupData(source, seconds);
-		backupData.start(seconds);
 
 		src.sendMessage(Text.of(TextColors.DARK_GREEN, "Scheduled backup created"));
 

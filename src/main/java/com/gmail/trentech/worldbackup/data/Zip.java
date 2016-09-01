@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -33,7 +34,7 @@ public class Zip {
 	public Zip(String worldName) {
 		this.worldName = worldName;
 
-		this.backupDir = new File(new ConfigManager().getConfig().getNode("settings", "backup_directory").getString());
+		this.backupDir = new File(ConfigManager.get().getConfig().getNode("settings", "backup_directory").getString());
 
 		if (!this.backupDir.isDirectory()) {
 			this.backupDir.mkdirs();
@@ -51,7 +52,7 @@ public class Zip {
 	}
 
 	public void save() {
-		Main.getLog().info("Backing up " + this.worldName);
+		Main.instance().getLog().info("Backing up " + this.worldName);
 
 		Collection<Player> players = Sponge.getServer().getOnlinePlayers();
 
@@ -85,7 +86,7 @@ public class Zip {
 			player.sendMessage(Text.of(TextColors.GREEN, "[World Backup] ", TextColors.YELLOW, "Backup complete"));
 		}
 
-		Main.getLog().info("Backup complete");
+		Main.instance().getLog().info("Backup complete");
 	}
 
 	public void clean(int keep) {
@@ -131,13 +132,28 @@ public class Zip {
 				while ((length = fileInputStream.read(buffer)) > 0) {
 					zipOutputStream.write(buffer, 0, length);
 				}
-				Main.getLog().info(relativePath + " -> " + zipName);
+				Main.instance().getLog().info(relativePath + " -> " + zipName);
 			} catch (Exception e) {
-				Main.getLog().warn("Skipped: " + relativePath);
+				Main.instance().getLog().warn("Skipped: " + relativePath);
 			}
 
 			zipOutputStream.closeEntry();
 			fileInputStream.close();
+		}
+	}
+	
+	public class FileComparator implements Comparator<File> {
+
+		public int compare(File f0, File f1) {
+			long date1 = f0.lastModified();
+			long date2 = f1.lastModified();
+
+			if (date1 > date2)
+				return 1;
+			else if (date2 > date1)
+				return -1;
+
+			return 0;
 		}
 	}
 }

@@ -8,15 +8,15 @@ public class CommandManager {
 
 	public CommandSpec cmdCreate = CommandSpec.builder()
 		    .permission("worldbackup.cmd.backup.create")
-		    .arguments(GenericArguments.optional(GenericArguments.string(Text.of("source"))),
-		    		GenericArguments.optional(GenericArguments.string(Text.of("interval"))),
-		    		GenericArguments.optional(GenericArguments.string(Text.of("delay"))))
+		    .arguments(GenericArguments.string(Text.of("source")),
+		    		GenericArguments.longNum(Text.of("interval")),
+		    		GenericArguments.optional(GenericArguments.longNum(Text.of("delay"))))
 		    .executor(new CMDCreate())
 		    .build();
 	
 	public CommandSpec cmdRemove = CommandSpec.builder()
 		    .permission("worldbackup.cmd.backup.remove")
-		    .arguments(GenericArguments.optional(GenericArguments.string(Text.of("source"))))
+		    .arguments(GenericArguments.string(Text.of("source")))
 		    .executor(new CMDRemove())
 		    .build();
 	
