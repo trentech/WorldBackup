@@ -58,8 +58,7 @@ public class CMDBackup implements CommandExecutor {
 		String source = args.<String> getOne("source").get();
 
 		if (!source.equalsIgnoreCase("all") && !Sponge.getServer().getWorldProperties(source).isPresent()) {
-			src.sendMessage(Text.of(TextColors.DARK_RED, source, " does not exist"));
-			return CommandResult.empty();
+			throw new CommandException(Text.of(TextColors.RED, source, " does not exist"));
 		}
 
 		if (source.equalsIgnoreCase("all")) {
