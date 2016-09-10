@@ -149,7 +149,7 @@ public class BackupData {
 					zip.clean(keep);
 				}
 			}
-		}).submit(Main.instance().getPlugin());
+		}).submit(Main.getPlugin());
 	}
 
 	public static Optional<BackupData> get(String source) {
