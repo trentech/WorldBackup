@@ -30,13 +30,11 @@ public class CMDCreate implements CommandExecutor {
 		Optional<BackupData> optionalBackupData = BackupData.get(source);
 
 		if (optionalBackupData.isPresent()) {
-			src.sendMessage(Text.of(TextColors.DARK_RED, source, " already exists"));
-			return CommandResult.empty();
+			throw new CommandException(Text.of(TextColors.RED, source, " already exists"));
 		}
 
 		if (!source.equalsIgnoreCase("all") && !Sponge.getServer().getWorldProperties(source).isPresent()) {
-			src.sendMessage(Text.of(TextColors.DARK_RED, source, " does not exist"));
-			return CommandResult.empty();
+			throw new CommandException(Text.of(TextColors.RED, source, " does not exist"));
 		}
 
 		long interval = args.<Long> getOne("interval").get() * 60;

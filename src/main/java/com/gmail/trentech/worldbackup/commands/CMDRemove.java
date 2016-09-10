@@ -29,8 +29,7 @@ public class CMDRemove implements CommandExecutor {
 		Optional<BackupData> optionalBackupData = BackupData.get(source);
 
 		if (!optionalBackupData.isPresent()) {
-			src.sendMessage(Text.of(TextColors.DARK_RED, source, " does not exist"));
-			return CommandResult.empty();
+			throw new CommandException(Text.of(TextColors.RED, source, " does not exist"));
 		}
 
 		optionalBackupData.get().delete();
